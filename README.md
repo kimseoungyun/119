@@ -251,8 +251,6 @@ class MultimodalClassifier(nn.Module):
 본 프로젝트에서는 멀티모달(음성+텍스트) 및 멀티태스크(긴급도+감정) 문제 특성을 고려하여,
 각 모달리티별로 여러 사전학습(pretrained) 모델을 후보군으로 선정하고 비교하였다.
 
----
-
 #### 4.4.1. Audio Encoder 후보
 
 ##### 1) MFCC (Mel-Frequency Cepstral Coefficients)
@@ -268,7 +266,6 @@ class MultimodalClassifier(nn.Module):
 - **채택 여부**
   - ❌ 초기 베이스라인 시도 후 성능 및 융합 한계로 최종 모델에서는 미채택
 
----
 
 ##### 2) Wav2Vec 2.0
 - **특징**
@@ -281,8 +278,6 @@ class MultimodalClassifier(nn.Module):
 - **채택 여부**
   - ✅ 최종 Audio Encoder로 채택
 
----
-
 ##### 3) HuBERT (Hidden-Unit BERT)
 - **특징**
   - 음성 프레임을 클러스터링하여 pseudo-label을 생성하고, 이를 예측하는 방식으로 학습
@@ -292,8 +287,6 @@ class MultimodalClassifier(nn.Module):
   - 음성의 구조적·음소 단위 정보를 잘 반영
 - **채택 여부**
   - 🔁 실험용 대안 모델로 사용 (융합 실험 수행)
-
----
 
 #### 4.4.2. Text Encoder 후보
 
@@ -307,7 +300,6 @@ class MultimodalClassifier(nn.Module):
 - **채택 여부**
   - ✅ 베이스라인 및 최종 모델의 Text Encoder로 채택
 
----
 
 ##### 2) RoBERTa (klue/roberta-base)
 - **특징**
@@ -319,7 +311,6 @@ class MultimodalClassifier(nn.Module):
 - **채택 여부**
   - 🔁 Text Encoder 대체 실험에 사용
 
----
 
 #### 4.4.3. 모델 후보 요약
 
