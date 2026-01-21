@@ -150,7 +150,7 @@
 - **프로세스**:
   - **텍스트(Text) 추출:** `utterances` 배열(list) 안에 나뉘어 저장된 여러 텍스트 조각들을 모두 추출하여 하나의 단일 텍스트 문자열로 결합합니다.
   - **메타데이터(Meta data) 추출:** 모델 학습에 필요한 다음 항목들을 `.JSON` 파일에서 직접 추출.
-    - `gender`, `address`, ` disaster`` , ``disasterLarge` , `urgencyLevel`, `sentiment`, `symptom`, `triage`
+    - `gender`, `address`, ` disaster` , `disasterLarge` , `urgencyLevel`, `sentiment`, `symptom`, `triage`
 - **출력:** 추출된 단일 텍스트와 모든 메타데이터 항목들을 컬럼(column)으로 하는 **`.csv`** 파일(예: `train.csv`)을 생성.
 
 #### 3.5.3. 최종 통합
