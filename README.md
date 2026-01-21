@@ -245,7 +245,92 @@ class MultimodalClassifier(nn.Module):
 - **최종 결정 (Wav2Vec2)**: 
   - **선정 이유**: 대량의 음성 데이터로 사전 학습된 Wav2Vec2는 음성의 문맥적 정보(Contextual Information)를 스스로 학습한 모델임.
   - **이점**: 별도의 복잡한 전처리 없이 raw waveform을 입력받아 고수준의 특징을 추출할 수 있으며, Transformer 기반 구조 덕분에 Text Encoder(KcELECTRA)와의 융합(Fusion)이 구조적으로 용이함.
-  - 
+ 
+### 4.4. 모델 후보 항목 및 특징
+
+본 프로젝트에서는 멀티모달(음성+텍스트) 및 멀티태스크(긴급도+감정) 문제 특성을 고려하여,
+각 모달리티별로 여러 사전학습(pretrained) 모델을 후보군으로 선정하고 비교하였다.
+
+---
+
+#### 4.4.1. Audio Encoder 후보
+
+##### 1) MFCC (Mel-Frequency Cepstral Coefficients)
+- **특징**
+  - 음성을 주파수 영역으로 변환한 뒤 Mel-scale 필터를 적용하여 계수 형태로 표현하는 전통적 음성 특징
+  - 계산 비용이 낮고 해석 가능성이 높음
+- **장점**
+  - 빠른 전처리 및 경량 모델 구성 가능
+  - 소규모 데이터 환경에서 안정적인 특징 제공
+- **한계**
+  - Hand-crafted feature로 감정, 억양, 운율(prosody) 등 고수준 음성 정보를 충분히 반영하기 어려움
+  - 2D 특징 맵 형태로 생성되어 Transformer 기반 텍스트 임베딩과의 융합이 까다로움
+- **채택 여부**
+  - ❌ 초기 베이스라인 시도 후 성능 및 융합 한계로 최종 모델에서는 미채택
+
+---
+
+##### 2) Wav2Vec 2.0
+- **특징**
+  - Raw waveform을 입력으로 받아 자기지도 학습(Self-supervised learning)을 통해 음성 표현을 학습하는 모델
+  - CNN 기반 feature encoder + Transformer 구조
+- **장점**
+  - 라벨이 없는 대규모 음성 데이터로부터 고수준 음성 표현 학습 가능
+  - 감정, 억양, 발화 스타일 등 문맥적 음성 정보(Contextual information) 포착에 강점
+  - Transformer 기반 구조로 텍스트 인코더와의 융합이 용이
+- **채택 여부**
+  - ✅ 최종 Audio Encoder로 채택
+
+---
+
+##### 3) HuBERT (Hidden-Unit BERT)
+- **특징**
+  - 음성 프레임을 클러스터링하여 pseudo-label을 생성하고, 이를 예측하는 방식으로 학습
+  - 연속적인 음성 신호를 이산적인 단위(hidden unit) 예측 문제로 변환
+- **장점**
+  - Wav2Vec2 대비 학습 안정성이 높음
+  - 음성의 구조적·음소 단위 정보를 잘 반영
+- **채택 여부**
+  - 🔁 실험용 대안 모델로 사용 (융합 실험 수행)
+
+---
+
+#### 4.4.2. Text Encoder 후보
+
+##### 1) KcELECTRA
+- **특징**
+  - ELECTRA 구조 기반의 한국어 특화 사전학습 모델
+  - 한국어 댓글, SNS, 구어체 데이터 중심 학습
+- **장점**
+  - 비표준 표현, 감정 표현, 구어체 문장 처리에 강점
+  - Replaced Token Detection 방식으로 학습 효율이 높음
+- **채택 여부**
+  - ✅ 베이스라인 및 최종 모델의 Text Encoder로 채택
+
+---
+
+##### 2) RoBERTa (klue/roberta-base)
+- **특징**
+  - BERT 구조를 기반으로 NSP 제거, 대규모 데이터 및 장시간 학습을 통해 성능을 향상시킨 모델
+  - KLUE 코퍼스로 학습된 한국어 특화 버전
+- **장점**
+  - 문맥 이해 능력이 뛰어나 복잡한 문장 구조와 감정 표현에 강점
+  - 감정 분류 태스크에서 우수한 성능
+- **채택 여부**
+  - 🔁 Text Encoder 대체 실험에 사용
+
+---
+
+#### 4.4.3. 모델 후보 요약
+
+| Modality | Model        | 핵심 특징 요약                                  | 사용 여부 |
+|----------|--------------|-----------------------------------------------|-----------|
+| Audio    | MFCC         | 전통적 주파수 기반 특징, 해석 용이             | ❌        |
+| Audio    | Wav2Vec2     | Self-supervised, 문맥적 음성 표현 학습         | ✅        |
+| Audio    | HuBERT       | Clustering 기반 pseudo-label 예측              | 🔁        |
+| Text     | KcELECTRA    | 한국어 구어체 특화, 학습 효율 우수              | ✅        |
+| Text     | RoBERTa      | 문맥 표현력 강화된 BERT 계열                   | 🔁        |
+
 ---
 
 ## 5. 실험/학습
